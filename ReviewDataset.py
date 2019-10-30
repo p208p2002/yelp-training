@@ -1,8 +1,8 @@
 from ReviewVectorizer import ReviewVectorizer
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import pandas as pd
 import json
-
+import torch
 class ReviewDataset(Dataset):
     def __init__(self, review_df, vectorizer):
         """

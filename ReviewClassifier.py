@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+
 class ReviewClassifier(nn.Module):
     """ a simple perceptron based classifier """
     def __init__(self, num_features):

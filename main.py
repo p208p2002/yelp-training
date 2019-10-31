@@ -23,11 +23,12 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
                                                 patience=1)
 
 DEVICE = 'cuda' # cuda or gpu
+MODEL_STATE_FILE = 'model.pth'
 device = torch.device(DEVICE)
 classifier = classifier.to(device)
 
 try:
-    for epoch in range(1000):
+    for epoch in range(20):
         dataset.set_split('train')
         batch_generator = generate_batches(dataset, 
                                            batch_size=256, 
@@ -56,7 +57,7 @@ try:
             #
             acc_t = compute_accuracy(y_pred, batch_dict['y_target'])
             running_acc += (acc_t - running_acc) / (batch_index + 1)
-            print("train loss:%f ,train acc:%f"%(running_loss,running_acc))
+            print("epoch:%d, train loss:%f, train acc:%f"%(epoch,running_loss,running_acc))
 
         # eval        
         dataset.set_split('val')
@@ -78,7 +79,9 @@ try:
             # 計算正確
             acc_t = compute_accuracy(y_pred, batch_dict['y_target'])
             running_acc_val += (acc_t - running_acc_val) / (batch_index + 1)
-            print("val loss:%f ,val acc:%f"%(running_loss_val,running_acc_val))
+            print("epoch:%d, val loss:%f, val acc:%f"%(epoch,running_loss_val,running_acc_val))
+    
+    torch.save(classifier.state_dict(),MODEL_STATE_FILE)
         
 except KeyboardInterrupt:
     print("exit")

@@ -22,9 +22,10 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
                                                 mode='min', factor=0.5,
                                                 patience=1)
 
-DEVICE = 'cuda'
+DEVICE = 'cuda' # cuda or gpu
 device = torch.device(DEVICE)
 classifier = classifier.to(device)
+
 try:
     for epoch in range(1000):
         dataset.set_split('train')
@@ -55,7 +56,29 @@ try:
             #
             acc_t = compute_accuracy(y_pred, batch_dict['y_target'])
             running_acc += (acc_t - running_acc) / (batch_index + 1)
-        print("train loss:%f ,train acc:%f"%(running_loss,running_acc))
+            print("train loss:%f ,train acc:%f"%(running_loss,running_acc))
 
+        # eval        
+        dataset.set_split('val')
+        batch_generator = generate_batches(dataset,
+                                            batch_size=256,
+                                            device=device)
+        running_loss_val = 0.0
+        running_acc_val = 0.0
+        classifier.eval()
+        for batch_index, batch_dict in enumerate(batch_generator):
+            # 計算output
+            y_pred = classifier(x_in=batch_dict['x_data'].float())
+
+            # 計算loss
+            loss = loss_func(y_pred,batch_dict['y_target'].float())
+            loss_t = loss.item()
+            running_loss_val += (loss_t - running_loss_val) / (batch_index + 1)
+
+            # 計算正確
+            acc_t = compute_accuracy(y_pred, batch_dict['y_target'])
+            running_acc_val += (acc_t - running_acc_val) / (batch_index + 1)
+            print("val loss:%f ,val acc:%f"%(running_loss_val,running_acc_val))
+        
 except KeyboardInterrupt:
     print("exit")
